@@ -12,7 +12,7 @@ class WeatherScreen extends StatefulWidget {
 
 class _WeatherScreenState extends State<WeatherScreen> {
   late Future<void> _weatherFuture;
-  String selectedIslandName = "Sipadan Island";  // Default island name
+  String selectedIslandName = "Sipadan Island"; // Default island name
 
   // List of favorite scuba diving islands with their coordinates
   final List<Map<String, dynamic>> favoriteIslands = [
@@ -43,17 +43,25 @@ class _WeatherScreenState extends State<WeatherScreen> {
     },
   ];
 
+  // Map of island names to background images
+  final Map<String, String> backgroundImages = {
+    "Sipadan Island": "assets/sipadan.jpg",
+    "Perhentian Islands": "assets/perhentian.jpg",
+    "Redang Island": "assets/redang.jpg",
+    "Tioman Island": "assets/tioman.jpg",
+    "Lang Tengah Island": "assets/lang_tengah.jpg",
+    "Your Location": "assets/default.jpg",
+  };
+
   @override
   void initState() {
     super.initState();
-    // Load weather for the first island by default
     _weatherFuture = _loadWeather(favoriteIslands[0]['latitude'], favoriteIslands[0]['longitude']);
   }
 
   Future<void> _loadWeather(double latitude, double longitude) async {
     try {
-      await Provider.of<WeatherProvider>(context, listen: false)
-          .fetchWeather(latitude, longitude);
+      await Provider.of<WeatherProvider>(context, listen: false).fetchWeather(latitude, longitude);
     } catch (e) {
       throw Exception('Failed to load weather: $e');
     }
@@ -61,11 +69,10 @@ class _WeatherScreenState extends State<WeatherScreen> {
 
   Future<void> _loadCurrentLocationWeather() async {
     try {
-      // Call the determinePosition function to get the current location
       Position position = await determinePosition();
       _weatherFuture = _loadWeather(position.latitude, position.longitude);
       setState(() {
-        selectedIslandName = "Your Location";  // Set name as "Your Location"
+        selectedIslandName = "Your Location";
       });
     } catch (e) {
       print('Error fetching location: $e');
@@ -78,119 +85,118 @@ class _WeatherScreenState extends State<WeatherScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('Weather App'),
+        title: const Text('Weather App'),
       ),
-      body: Column(
-        children: [
-          // Text bar showing favorite scuba diving islands with a dark blue background
-          Container(
-            padding: EdgeInsets.all(8.0), // Dark blue background
-            child: SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: Row(
-                children: favoriteIslands.map((island) {
-                  return Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 12.0),  // Increase horizontal padding
-                    child: GestureDetector(
-                      onTap: () {
-                        setState(() {
-                          // Update weather for the selected island
-                          selectedIslandName = island['name'];  // Set selected island name
-                          _weatherFuture = _loadWeather(island['latitude'], island['longitude']);
-                        });
-                      },
-                      child: Chip(
+      body: Container(
+        decoration: BoxDecoration(
+          image: DecorationImage(
+            image: AssetImage(backgroundImages[selectedIslandName] ?? "assets/default.jpg"),
+            fit: BoxFit.cover,
+          ),
+        ),
+        child: Column(
+          children: [
+            Container(
+              padding: const EdgeInsets.symmetric(vertical: 10.0),
+              child: SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: Row(
+                  children: favoriteIslands.map((island) {
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                      child: ActionChip(
                         label: Text(
                           island['name'],
-                          style: TextStyle(
-                            color: Colors.white,  // White text
-                            fontSize: 18,  // Increase font size
-                          ),
+                          style: const TextStyle(color: Colors.white),
                         ),
-                        backgroundColor: Color(0xFF00008B),  // Blue chip background
-                        padding: EdgeInsets.symmetric(vertical: 12.0, horizontal: 16.0),  // Increase padding
+                        backgroundColor: Color(0xFF004A96),
+                        onPressed: () {
+                          setState(() {
+                            selectedIslandName = island['name'];
+                            _weatherFuture = _loadWeather(island['latitude'], island['longitude']);
+                          });
+                        },
                       ),
-                    ),
-                  );
-                }).toList(),
+                    );
+                  }).toList(),
+                ),
               ),
             ),
-          ),
-          Expanded(
-            child: FutureBuilder(
-              future: _weatherFuture,
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return Center(child: CircularProgressIndicator());
-                } else if (snapshot.hasError) {
-                  return Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          'Error: ${snapshot.error}',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(fontSize: 18, color: Colors.red),
-                        ),
-                        SizedBox(height: 16),
-                        ElevatedButton(
-                          onPressed: () {
-                            setState(() {
-                              _weatherFuture = _loadWeather(favoriteIslands[0]['latitude'], favoriteIslands[0]['longitude']);
-                            });
-                          },
-                          child: Text('Retry'),
-                        ),
-                      ],
-                    ),
-                  );
-                } else {
-                  return Consumer<WeatherProvider>(
-                    builder: (context, provider, child) {
-                      if (provider.weatherData == null) {
-                        return Center(child: CircularProgressIndicator());
-                      } else {
-                        return Padding(
-                          padding: const EdgeInsets.all(16.0),
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Text(
-                                selectedIslandName,  // Use the selected island name
-                                style: TextStyle(
-                                  fontSize: 28,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                              SizedBox(height: 8),
-                              Text(
-                                '${provider.weatherData!['main']['temp']}°C',
-                                style: TextStyle(fontSize: 64),
-                              ),
-                              SizedBox(height: 8),
-                              Text(
-                                '${provider.weatherData!['weather'][0]['description']}',
-                                style: TextStyle(fontSize: 20),
-                              ),
-                              // Button to fetch current location weather placed below the description
-                              ElevatedButton(
-                                onPressed: _loadCurrentLocationWeather,
-                                style: ElevatedButton.styleFrom(
-                                  foregroundColor: Colors.white, backgroundColor: Color(0xFF00008B),     // Set text color to white
-                                ),
-                                child: Text('Get My Location Weather'),
-                              ),
-                            ],
+            Expanded(
+              child: FutureBuilder(
+                future: _weatherFuture,
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const Center(child: CircularProgressIndicator());
+                  } else if (snapshot.hasError) {
+                    return Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            'Error: ${snapshot.error}',
+                            textAlign: TextAlign.center,
+                            style: const TextStyle(fontSize: 18, color: Colors.red),
                           ),
-                        );
-                      }
-                    },
-                  );
-                }
-              },
+                          const SizedBox(height: 16),
+                          ElevatedButton(
+                            onPressed: () {
+                              setState(() {
+                                _weatherFuture = _loadWeather(favoriteIslands[0]['latitude'], favoriteIslands[0]['longitude']);
+                              });
+                            },
+                            child: const Text('Retry'),
+                          ),
+                        ],
+                      ),
+                    );
+                  } else {
+                    return Consumer<WeatherProvider>(
+                      builder: (context, provider, child) {
+                        if (provider.weatherData == null) {
+                          return const Center(child: CircularProgressIndicator());
+                        } else {
+                          return Padding(
+                            padding: const EdgeInsets.all(16.0),
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text(
+                                  selectedIslandName,
+                                  style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
+                                ),
+                                const SizedBox(height: 8),
+                                Text(
+                                  '${provider.weatherData!['main']['temp']}°C',
+                                  style: const TextStyle(fontSize: 64),
+                                ),
+                                const SizedBox(height: 8),
+                                Text(
+                                  '${provider.weatherData!['weather'][0]['description']}',
+                                  style: const TextStyle(fontSize: 20),
+                                ),
+                                const SizedBox(height: 16),
+                                ElevatedButton.icon(
+                                  onPressed: _loadCurrentLocationWeather,
+                                  icon: const Icon(Icons.location_on),
+                                  label: const Text('Get My Location Weather'),
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: Color(0xFF004A96),
+                                    foregroundColor: Colors.white,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          );
+                        }
+                      },
+                    );
+                  }
+                },
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
