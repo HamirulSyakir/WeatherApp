@@ -50,7 +50,7 @@ class _WeatherScreenState extends State<WeatherScreen> {
     "Redang Island": "assets/redang.jpg",
     "Tioman Island": "assets/tioman.jpg",
     "Lang Tengah Island": "assets/lang_tengah.jpg",
-    "Your Location": "assets/default.jpg",
+    "Your Location": "assets/ampang.jpg",
   };
 
   @override
@@ -122,79 +122,89 @@ class _WeatherScreenState extends State<WeatherScreen> {
                 ),
               ),
             ),
-            Expanded(
-              child: FutureBuilder(
-                future: _weatherFuture,
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
+      Expanded(
+        child: FutureBuilder(
+          future: _weatherFuture,
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Center(child: CircularProgressIndicator());
+            } else if (snapshot.hasError) {
+              return Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      'Error: ${snapshot.error}',
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(fontSize: 18, color: Colors.red),
+                    ),
+                    const SizedBox(height: 16),
+                    ElevatedButton(
+                      onPressed: () {
+                        setState(() {
+                          _weatherFuture = _loadWeather(favoriteIslands[0]['latitude'], favoriteIslands[0]['longitude']);
+                        });
+                      },
+                      child: const Text('Retry'),
+                    ),
+                  ],
+                ),
+              );
+            } else {
+              return Consumer<WeatherProvider>(
+                builder: (context, provider, child) {
+                  if (provider.weatherData == null) {
                     return const Center(child: CircularProgressIndicator());
-                  } else if (snapshot.hasError) {
-                    return Center(
+                  } else {
+                    return Padding(
+                      padding: const EdgeInsets.all(16.0),
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Text(
-                            'Error: ${snapshot.error}',
-                            textAlign: TextAlign.center,
-                            style: const TextStyle(fontSize: 18, color: Colors.red),
+                            selectedIslandName,
+                            style: const TextStyle(
+                              fontSize: 28,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white, // Set text color to white
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            '${provider.weatherData!['main']['temp']}°C',
+                            style: const TextStyle(
+                              fontSize: 64,
+                              color: Colors.white, // Set text color to white
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            '${provider.weatherData!['weather'][0]['description']}',
+                            style: const TextStyle(
+                              fontSize: 20,
+                              color: Colors.white, // Set text color to white
+                            ),
                           ),
                           const SizedBox(height: 16),
-                          ElevatedButton(
-                            onPressed: () {
-                              setState(() {
-                                _weatherFuture = _loadWeather(favoriteIslands[0]['latitude'], favoriteIslands[0]['longitude']);
-                              });
-                            },
-                            child: const Text('Retry'),
+                          ElevatedButton.icon(
+                            onPressed: _loadCurrentLocationWeather,
+                            icon: const Icon(Icons.location_on),
+                            label: const Text('Get My Location Weather'),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Color(0xFF004A96),
+                              foregroundColor: Colors.white,
+                            ),
                           ),
                         ],
                       ),
                     );
-                  } else {
-                    return Consumer<WeatherProvider>(
-                      builder: (context, provider, child) {
-                        if (provider.weatherData == null) {
-                          return const Center(child: CircularProgressIndicator());
-                        } else {
-                          return Padding(
-                            padding: const EdgeInsets.all(16.0),
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Text(
-                                  selectedIslandName,
-                                  style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
-                                ),
-                                const SizedBox(height: 8),
-                                Text(
-                                  '${provider.weatherData!['main']['temp']}°C',
-                                  style: const TextStyle(fontSize: 64),
-                                ),
-                                const SizedBox(height: 8),
-                                Text(
-                                  '${provider.weatherData!['weather'][0]['description']}',
-                                  style: const TextStyle(fontSize: 20),
-                                ),
-                                const SizedBox(height: 16),
-                                ElevatedButton.icon(
-                                  onPressed: _loadCurrentLocationWeather,
-                                  icon: const Icon(Icons.location_on),
-                                  label: const Text('Get My Location Weather'),
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: Color(0xFF004A96),
-                                    foregroundColor: Colors.white,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          );
-                        }
-                      },
-                    );
                   }
                 },
-              ),
-            ),
+              );
+            }
+          },
+        ),
+      ),
           ],
         ),
       ),
