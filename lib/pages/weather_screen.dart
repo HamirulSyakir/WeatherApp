@@ -97,19 +97,25 @@ class _WeatherScreenState extends State<WeatherScreen> {
         child: Column(
           children: [
             Container(
+              height: 100.0, // Increase the height of the container
               padding: const EdgeInsets.symmetric(vertical: 10.0),
               child: SingleChildScrollView(
                 scrollDirection: Axis.horizontal,
                 child: Row(
                   children: favoriteIslands.map((island) {
                     return Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                      padding: const EdgeInsets.symmetric(horizontal: 12.0), // Add more spacing
                       child: ActionChip(
                         label: Text(
                           island['name'],
-                          style: const TextStyle(color: Colors.white),
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 18, // Increase font size
+                            fontWeight: FontWeight.bold, // Make text bold
+                          ),
                         ),
-                        backgroundColor: Color(0xFF004A96),
+                        backgroundColor: const Color(0xFF004A96),
+                        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0), // Add more padding
                         onPressed: () {
                           setState(() {
                             selectedIslandName = island['name'];
@@ -122,7 +128,7 @@ class _WeatherScreenState extends State<WeatherScreen> {
                 ),
               ),
             ),
-      Expanded(
+            Expanded(
         child: FutureBuilder(
           future: _weatherFuture,
           builder: (context, snapshot) {
