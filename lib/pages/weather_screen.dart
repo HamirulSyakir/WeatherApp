@@ -177,30 +177,40 @@ class _WeatherScreenState extends State<WeatherScreen> {
                           ),
                           const SizedBox(height: 8),
                           Text(
-                            '${provider.weatherData!['main']['temp']}°C',
+                            '${provider.weatherData?.temperature}°C',
                             style: const TextStyle(
                               fontSize: 64,
-                              color: Colors.white, // Set text color to white
+                              color: Colors.white,
                             ),
                           ),
-                          const SizedBox(height: 8),
                           Text(
-                            '${provider.weatherData!['weather'][0]['description']}',
+                            provider.weatherData?.description ?? '',
                             style: const TextStyle(
                               fontSize: 20,
-                              color: Colors.white, // Set text color to white
+                              color: Colors.white,
                             ),
                           ),
-                          const SizedBox(height: 16),
+                          const SizedBox(height: 24),
                           ElevatedButton.icon(
                             onPressed: _loadCurrentLocationWeather,
-                            icon: const Icon(Icons.location_on),
-                            label: const Text('Get My Location Weather'),
+                            icon: const Icon(
+                              Icons.location_on,
+                              size: 24, // Moderate icon size
+                            ),
+                            label: const Text(
+                              'Get My Location Weather',
+                              style: TextStyle(
+                                fontSize: 16, // Moderate font size
+                              ),
+                            ),
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: Color(0xFF004A96),
+                              padding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 24.0), // Moderate padding
+                              backgroundColor: const Color(0xFF004A96),
                               foregroundColor: Colors.white,
+                              // Reasonable height
                             ),
                           ),
+
                         ],
                       ),
                     );

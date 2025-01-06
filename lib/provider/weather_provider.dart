@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:weather_app/service/weather_service.dart';
+import 'package:weather_app/models/weather_model.dart';
 
 
 class WeatherProvider with ChangeNotifier {
   final WeatherService _weatherService = WeatherService();
-  Map<String, dynamic>? _weatherData;
+  WeatherModel? _weatherData;
 
-  Map<String, dynamic>? get weatherData => _weatherData;
+  WeatherModel? get weatherData => _weatherData;
 
   Future<void> fetchWeather(double lat, double lon) async {
     _weatherData = await _weatherService.fetchWeather(lat, lon);
@@ -30,7 +31,15 @@ Future<Position> determinePosition() async {
     }
   }
 
+  // Create location settings
+  LocationSettings locationSettings = LocationSettings(
+    accuracy: LocationAccuracy.high,
+    distanceFilter: 10, // Optional: specify the minimum distance (in meters) for location updates
+  );
+
+  // Get the current position with the updated settings
   return await Geolocator.getCurrentPosition(
-      desiredAccuracy: LocationAccuracy.high);
+    locationSettings: locationSettings,
+  );
 }
 
