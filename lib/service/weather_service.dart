@@ -1,13 +1,17 @@
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:weather_app/models/weather_model.dart';
 
-// Weather Service
 class WeatherService {
-  final String apiKey = '09f601d267abfc074ad46096728c649f';
   final String baseUrl = 'https://api.openweathermap.org/data/2.5/weather';
 
   Future<WeatherModel> fetchWeather(double lat, double lon) async {
+    final apiKey = dotenv.env['WEATHER_API_KEY'];
+    if (apiKey == null || apiKey.isEmpty) {
+      throw Exception('API Key is missing');
+    }
+
     final response = await http.get(
       Uri.parse('$baseUrl?lat=$lat&lon=$lon&appid=$apiKey&units=metric'),
     );
