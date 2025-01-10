@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:weather_app/provider/weather_provider.dart';
+import 'package:weather_app/models/favorite_islands.dart';
 
 class WeatherScreen extends StatefulWidget {
   const WeatherScreen({super.key});
@@ -15,46 +16,7 @@ class _WeatherScreenState extends State<WeatherScreen> with SingleTickerProvider
   late AnimationController _rainController;
   late Animation<double> _rainAnimation;
 
-  String selectedIslandName = "Sipadan Island"; // Default island name
-
-  // List of favorite scuba diving islands with their coordinates
-  final List<Map<String, dynamic>> favoriteIslands = [
-    {
-      "name": "Sipadan Island",
-      "latitude": 4.1150,
-      "longitude": 118.6287,
-    },
-    {
-      "name": "Perhentian Islands",
-      "latitude": 5.9800,
-      "longitude": 102.7444,
-    },
-    {
-      "name": "Redang Island",
-      "latitude": 5.8833,
-      "longitude": 102.2167,
-    },
-    {
-      "name": "Tioman Island",
-      "latitude": 2.8150,
-      "longitude": 104.1500,
-    },
-    {
-      "name": "Lang Tengah Island",
-      "latitude": 5.7333,
-      "longitude": 103.0500,
-    },
-  ];
-
-  // Map of island names to background images
-  final Map<String, String> backgroundImages = {
-    "Sipadan Island": "assets/sipadan.jpg",
-    "Perhentian Islands": "assets/perhentian.jpg",
-    "Redang Island": "assets/redang.jpg",
-    "Tioman Island": "assets/tioman.jpg",
-    "Lang Tengah Island": "assets/lang_tengah.jpg",
-    "Your Location": "assets/ampang.jpg",
-  };
+  String selectedIslandName = "Sipadan Island";
 
   @override
   void initState() {
@@ -65,7 +27,7 @@ class _WeatherScreenState extends State<WeatherScreen> with SingleTickerProvider
     )..repeat();
     _rainAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(_rainController);
 
-    _weatherFuture = _loadWeather(favoriteIslands[0]['latitude'], favoriteIslands[0]['longitude']);
+    _weatherFuture = _loadWeather(FavoriteIslands.islands[0]['latitude'], FavoriteIslands.islands[0]['longitude']);
   }
 
   @override
@@ -115,14 +77,14 @@ class _WeatherScreenState extends State<WeatherScreen> with SingleTickerProvider
         Icon(
           Icons.cloud,
           size: 120,
-          color: Colors.white.withValues(alpha: 0.8), // Use double value
+          color: Colors.white.withValues(alpha: 0.8),
         ),
         Positioned(
           top: 20,
           child: Icon(
             Icons.cloud,
             size: 100,
-            color: Colors.white.withValues(alpha: 0.6), // Use double value
+            color: Colors.white.withValues(alpha: 0.6),
           ),
         ),
         Positioned(
@@ -130,7 +92,7 @@ class _WeatherScreenState extends State<WeatherScreen> with SingleTickerProvider
           child: Icon(
             Icons.cloud,
             size: 80,
-            color: Colors.white.withValues(alpha: 0.4), // Use double value
+            color: Colors.white.withValues(alpha: 0.4),
           ),
         ),
       ],
@@ -144,7 +106,7 @@ class _WeatherScreenState extends State<WeatherScreen> with SingleTickerProvider
         Icon(
           Icons.cloud,
           size: 120,
-          color: Colors.white.withValues(alpha: 0.8), // Use double value
+          color: Colors.white.withValues(alpha: 0.8),
         ),
         AnimatedBuilder(
           animation: _rainAnimation,
@@ -166,14 +128,14 @@ class _WeatherScreenState extends State<WeatherScreen> with SingleTickerProvider
         Icon(
           Icons.wb_sunny,
           size: 120,
-          color: Colors.yellow.withValues(alpha: 0.8), // Use double value
+          color: Colors.yellow.withValues(alpha: 0.8),
         ),
         Positioned(
           top: -20,
           child: Icon(
             Icons.wb_sunny,
             size: 100,
-            color: Colors.yellow.withValues(alpha: 0.6), // Use double value
+            color: Colors.yellow.withValues(alpha: 0.6),
           ),
         ),
       ],
@@ -190,7 +152,7 @@ class _WeatherScreenState extends State<WeatherScreen> with SingleTickerProvider
       body: Container(
         decoration: BoxDecoration(
           image: DecorationImage(
-            image: AssetImage(backgroundImages[selectedIslandName] ?? "assets/default.jpg"),
+            image: AssetImage(FavoriteIslands.backgroundImages[selectedIslandName] ?? "assets/default.jpg"),
             fit: BoxFit.cover,
           ),
         ),
@@ -203,7 +165,7 @@ class _WeatherScreenState extends State<WeatherScreen> with SingleTickerProvider
               child: SingleChildScrollView(
                 scrollDirection: Axis.horizontal,
                 child: Row(
-                  children: favoriteIslands.map((island) {
+                  children: FavoriteIslands.islands.map((island) {
                     return Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 12.0),
                       child: ActionChip(
@@ -250,7 +212,7 @@ class _WeatherScreenState extends State<WeatherScreen> with SingleTickerProvider
                           ElevatedButton(
                             onPressed: () {
                               setState(() {
-                                _weatherFuture = _loadWeather(favoriteIslands[0]['latitude'], favoriteIslands[0]['longitude']);
+                                _weatherFuture = _loadWeather(FavoriteIslands.islands[0]['latitude'], FavoriteIslands.islands[0]['longitude']);
                               });
                             },
                             child: const Text('Retry'),

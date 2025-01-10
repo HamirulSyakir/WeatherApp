@@ -31,13 +31,12 @@ Future<Position> determinePosition() async {
     }
   }
 
-  // Create location settings
+
   LocationSettings locationSettings = LocationSettings(
     accuracy: LocationAccuracy.high,
-    distanceFilter: 10, // Optional: specify the minimum distance (in meters) for location updates
+    distanceFilter: 10,
   );
 
-  // Get the current position with the updated settings
   return await Geolocator.getCurrentPosition(
     locationSettings: locationSettings,
   );
